@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "verusdb"
+version = "0.0.0"
+description = ""
+authors = ["Roger Naranjo <rogernaranjo@gmail.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.8"
+polars = "^0.18.2"
+numpy = "^1.24.3"
+openai = "^0.27.8"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
