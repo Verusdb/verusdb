@@ -1,15 +1,15 @@
-# VerusDB
+# Verus
 
-VerusDB is a lightweight document database that allows you to store and search for documents based on their text content and metadata using embeddings. It is designed to be easy to use and integrate into your existing Python projects and infrastructure.
+Verus is a powerful, lightweight and flexible vector store that is designed to work seamlessly with multiple databases. It is built with LLM in mind, making it an ideal choice for natural language processing, information retrieval, and recommendation systems.
 
+One of the key benefits of Verus is its agnostic design, which allows it to integrate with a wide range of databases. This means that you can use Verus with your existing database infrastructure, without having to worry about compatibility issues.
 
 ## TODOs
-
-- [ ] DuckDB Integration
 - [ ] Redis Integration
+- [ ] PostgreSQL Integration
+- [ ] DuckDB Integration
+- [ ] CosmosDB Intergration
 - [ ] Benchmarking
-- [ ] SQLAlchemy Storage
-- [ ] MongoDB Storage
 
 
 ## Installation
@@ -25,7 +25,7 @@ from verusdb.settings import Settings
 from verusdb.client import VerusClient
 
 # Create a new VerusDB client
-settings = Settings(folder='data', engine='polars', store='parquet')
+settings = Settings(folder='data', engine='polars')
 client = VerusClient(settings)
 
 # Add some documents to the database
@@ -47,16 +47,20 @@ This will output a list of documents that match the search query, along with the
   {
     "collection": "MyCollection",
     "text": "This is my first document",
-    "metadata__source": "input",
-    "metadata__pages": "3",
-    "cosine_similarity": 0.937450967393278
+    "metadata": {
+      "source": "input",
+      "pages": "5"}
+    ,
+    "score": 0.937450967393278
   },
   {
     "collection": "MyCollection",
     "text": "This is my second document",
-    "metadata__source": "input",
-    "metadata__pages": "5",
-    "cosine_similarity": 0.8927016698439493
+    "metadata": {
+      "source": "input",
+      "pages": "5"}
+    ,
+    "score": 0.8927016698439493
   }
 ]
 ```
@@ -74,7 +78,6 @@ from verusdb.embeddings.openai import OpenAIEmbeddingsEngine
 settings = Settings(
     folder='data',
     engine='polars',
-    store='parquet',
     embeddings=OpenAIEmbeddingsEngine(key='my-openai-api-key')
 )
 client = VerusClient(settings)
