@@ -67,7 +67,9 @@ This will output a list of documents that match the search query, along with the
 
 # Configuration
 
-You can configure VerusDB by passing a Settings object to the VerusClient constructor. The Settings object allows you to specify the folder where the database files will be stored, the storage engine to use (currently only Polars is supported), and the file format to use (currently only Parquet is supported).
+You can configure VerusDB by passing a Settings object to the VerusClient constructor. The Settings object allows you to specify the folder where the database files will be stored, the storage engine to use (currently Polars and Redis are supported), 
+
+## Polars
 
 ```python
 from verusdb.settings import Settings
@@ -82,8 +84,31 @@ settings = Settings(
 )
 client = VerusClient(settings)
 ```
-## Contributing
+## Redis
+
+```python
+from verusdb.settings import Settings
+from verusdb.client import VerusClient
+from verusdb.embeddings.openai import OpenAIEmbeddingsEngine
+
+# Create a new VerusDB client with custom settings
+settings = Settings(
+    engine='redis',
+    redis = {
+                'host': 'localhost',
+                'port': 6379,
+                'db': 0,
+                'password': None,
+                'prefix': 'doc:',
+                'index': 'verusdb'
+    },     
+    embeddings=OpenAIEmbeddingsEngine(key='my-openai-api-key')
+)
+client = VerusClient(settings)
+```
+
+# Contributing
 If you find a bug or have a feature request, please open an issue on the [GitHub repository](https://github.com/verusdb/verusdb). Pull requests are also welcome!
 
-## License
+# License
 VerusDB is licensed under the [MIT License](https://opensource.org/licenses/MIT).
