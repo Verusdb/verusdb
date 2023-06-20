@@ -122,6 +122,5 @@ class TestVerusClient(unittest.TestCase):
 
         self.assertIsInstance(result, list)
         self.assertEqual(len(result), 3) # type: ignore
-        # self.assertEqual(result[0]['collection'], 'test')
-        # self.assertEqual(result[0]['text'], 'This is the first test')
+        self.assertEqual(result[0]['collection'], 'test')
         

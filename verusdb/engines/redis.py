@@ -110,7 +110,7 @@ class RedisEngine(BaseEngine):
         """
         Delete documents from the index based on filters
         """
-        self.store.
+        
         
         pass
 

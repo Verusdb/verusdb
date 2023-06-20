@@ -1,0 +1,30 @@
+name: Sample CI Check
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-20.04
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up Python 3.8.0
+        uses: actions/setup-python@v3
+        with:
+          python-version: "3.8.0"
+
+      - name: Install poetry dependencies
+        run: |
+          curl -sSL https://install.python-poetry.org | python3 -
+          poetry install
+
+      - name: Run unit tests
+        run: poetry run python -m pytest

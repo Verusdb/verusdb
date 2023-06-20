@@ -13,6 +13,9 @@ openai = "^0.27.8"
 redis = "^4.5.5"
 
 
+[tool.poetry.group.test.dependencies]
+pytest = "^7.3.2"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
