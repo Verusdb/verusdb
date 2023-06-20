@@ -15,7 +15,7 @@ class TestVerusClient(unittest.TestCase):
             engine='polars',
             store='parquet',
             embeddings=OpenAIEmbeddingsEngine(
-                api_key=os.environ['OPENAI_API_KEY'],
+                api_key=os.getenv('OPENAI_API_KEY', ''),
                 fake=True
             )
         )

@@ -28,7 +28,7 @@ class TestVerusRedisClient(unittest.TestCase):
                 'index': 'verusdb'
             },
             embeddings=OpenAIEmbeddingsEngine(
-                api_key=os.environ['OPENAI_API_KEY'],
+                api_key=os.getenv('OPENAI_API_KEY', ''),
                 fake=True
             ),
             
