@@ -29,10 +29,9 @@ class TestVerusClient(unittest.TestCase):
 
         
     def test_create_or_open(self):
-        self.assertIsInstance(self.client.get_store(), pl.DataFrame)
-        self.assertEqual(len(self.client.get_store().columns), 3)
-        self.assertListEqual(list(self.client.get_store().columns), ['collection', 'text', 'embeddings'])
-
+        self.assertIsInstance(self.client.get_documents(), list)
+        self.assertEqual(len(self.client.get_documents()), 0) # type: ignore
+        
     def test_add_documents(self):
         self.client.add(
             collection='test',
@@ -40,7 +39,7 @@ class TestVerusClient(unittest.TestCase):
             embeddings=[[1.0, 2.0, 3.0]],
             metadata=[{'test': 'test', 'test2': 'test2'}]
         )
-        self.assertEqual(len(self.client.get_store()), 1) # type: ignore
+        self.assertEqual(len(self.client.get_documents(collection='test')), 1) # type: ignore
 
 
     def test_search(self):
@@ -53,9 +52,9 @@ class TestVerusClient(unittest.TestCase):
         temp = self.client.search(embedding=[1.0, 2.0, 3.0], collection='test')
 
         self.assertIsInstance(temp, list)
-        self.assertEqual(len(temp), 4)
-        self.assertEqual(temp[0]['collection'], 'test')
-        self.assertEqual(temp[0]['text'], 'test')
+        self.assertEqual(len(temp), 4) # type: ignore
+        self.assertEqual(temp[0]['collection'], 'test') # type: ignore
+        self.assertEqual(temp[0]['text'], 'test') # type: ignore
 
 
     def test_search_multiple_entries(self):
@@ -68,9 +67,9 @@ class TestVerusClient(unittest.TestCase):
         
         temp = self.client.search(embedding=[1.0, 2.0, 3.0], collection='test')
         self.assertIsInstance(temp, list)
-        self.assertEqual(len(temp), 3)
-        self.assertEqual(temp[0]['collection'], 'test')
-        self.assertEqual(temp[0]['text'], 'test')
+        self.assertEqual(len(temp), 3) # type: ignore
+        self.assertEqual(temp[0]['collection'], 'test')# type: ignore
+        self.assertEqual(temp[0]['text'], 'test')# type: ignore
         self.assertEqual(temp[0]['metadata']['test'], 'test') # type: ignore
 
     def test_search_multiple_entries_and_filter(self):
@@ -95,8 +94,8 @@ class TestVerusClient(unittest.TestCase):
             metadata=[{'test': 'test'}, {'test': 'test2'}, {'test': 'test3'}]
         )
         self.client.save()
-        self.assertEqual(len(self.client.get_store()), 3)
-        self.assertListEqual(list(self.client.get_store().columns), ['collection', 'text', 'embeddings', 'metadata__test'])
+        self.assertEqual(len(self.client.get_documents(collection='test')), 3)
+        self.assertListEqual(list(self.client.get_documents(collection='test')[0].keys()), ['uuid','collection', 'text', 'embeddings', 'metadata'])
 
     def test_delete(self):
         self.client.add(
@@ -106,10 +105,28 @@ class TestVerusClient(unittest.TestCase):
             metadata=[{'test': 'test'}, {'test': 'test2'}, {'test': 'test3'}]
         )
         self.client.delete(filters={'test': 'test'})
-        self.assertEqual(len(self.client.get_store()), 2)
-        self.assertListEqual(list(self.client.get_store().columns), ['collection', 'text', 'embeddings', 'metadata__test'])
-        self.assertEqual(self.client.get_store().shape[0], 2)
+        self.assertEqual(len(self.client.get_documents(collection='test')), 2)
 
+
+    def test_update(self):
+        # get the uuid of the first entry
+        
+        self.client.add(
+            collection='test',
+            texts=['test', 'test2', 'test3'],
+            embeddings=[[1.0, 2.0, 3.0], [1.0, 5.0, 63.0], [71.0, 2.0, 1.0]],
+            metadata=[{'test': 'test'}, {'test': 'test2'}, {'test': 'test3'}]
+        )
+        uuid = self.client.get_documents(collection='test')[0]['uuid']
+        
+        self.client.update(
+            uuid=uuid, # type: ignore
+            metadata={'test': 'Updated'})
+        
+        self.assertEqual(self.client.get_document(uuid=uuid)['metadata']['test'], 'Updated') # type: ignore
+        
+            
+        
 
     def test_embeddings_creation(self):
         self.client.add(
@@ -122,5 +139,5 @@ class TestVerusClient(unittest.TestCase):
 
         self.assertIsInstance(result, list)
         self.assertEqual(len(result), 3) # type: ignore
-        self.assertEqual(result[0]['collection'], 'test')
+        self.assertEqual(result[0]['collection'], 'test') # type: ignore
         

@@ -6,16 +6,17 @@ from redis.commands.search.indexDefinition import IndexDefinition, IndexType
 from redis.commands.search.query import Query
 from verusdb.engines import BaseEngine
 from verusdb.settings import Settings
+from verusdb.utils import generate_uuid
 
 class RedisEngine(BaseEngine):
     """
-    PolarsEngine class
+    Regis endigne class
 
     """
 
     def __init__(self, settings: Settings):
         """
-        Create a new PolarsEngine instance
+        Create a new Redis Engine instance
         """
         self.settings = settings
         self.embeddings_engine = settings.embeddings
@@ -41,6 +42,7 @@ class RedisEngine(BaseEngine):
         except:
             # schema
             schema = (
+                TextField("uuid"),                     # UUID Field Name
                 TextField("collection"),                # Tag Field Name
                 TextField("text"),                     # Text Field Name
                 TagField("metadata"),                # Tag Field Name
@@ -75,10 +77,12 @@ class RedisEngine(BaseEngine):
         
         if metadata is None:
             metadata = [{}] * len(texts)
-
+            
+        uuids = generate_uuid(len(texts))
         
-        for text, embedding, meta in zip(texts, embeddings, metadata):
+        for uuid, text, embedding, meta in zip(uuids, texts, embeddings, metadata):
             data.append({
+                'uuid': uuid,
                 'collection': collection,
                 'text': text,
                 'embeddings': np.array(embedding).astype(np.float32).tobytes(),
@@ -92,8 +96,8 @@ class RedisEngine(BaseEngine):
         pipe = self.store.pipeline()
         
         for i, item in enumerate(data):
-            
-            pipe.hset(f"doc:{i}", mapping=item)
+            uuid = item['uuid']
+            pipe.hset(f"{self.redis_doc_prefix}:{uuid}", mapping=item)
         
 
         pipe.execute()
@@ -102,18 +106,52 @@ class RedisEngine(BaseEngine):
         
     def clear(self):
         self.store.flushdb()            
+   
+    def get_documents(self, collection : str | None = None):
+        """
+        Get all documents from the index
+        """
+        query_string = f"@collection:{collection}"
+        query = (Query(f"({query_string})"))
         
-
+        
+        results = self.store.ft(self.redis_index).search(query)
+        print(query_string, self.redis_index,results.docs)
+        
+        return self._serialize(results.docs)
+             
+    def get_document(self, uuid: str):
+        
+        return self._serialize(self.store.hgetall(f"{self.redis_doc_prefix}:{uuid}"))
       
 
-    def delete(self, filters: dict[str, str] | None = None):
+    def delete(self, uuid: str | None = None,  collection: str | None = None, filters: dict[str, str] | None = None):
         """
         Delete documents from the index based on filters
         """
+        if collection is None and filters is None and uuid is None:
+            ValueError("Must provide either a collection, filters or uuid")
+                   
+        if uuid:
+            self.store.delete(f"{self.redis_doc_prefix}:{uuid}")
+            return True   
+            
         
-        
-        pass
+                       
+        query_string = f"@collection:{collection}"
 
+        
+        if filters:
+            for key, value in filters.items():
+                query_string += f" @metadata:{key}:{value}"
+                
+        query = (Query(f"({query_string})=>[DEL]"))
+        
+        self.store.ft(self.redis_index).search(query)
+        
+        return True
+        
+        
     
 
     def search(self,  embedding: list[float], collection: str | None = None, filters: dict[str, str] | None = None, top_k: int = 10, return_objects: bool = False):
@@ -123,7 +161,7 @@ class RedisEngine(BaseEngine):
         # query_string = '*'
         
         
-        return_fields = ['collection', 'text', 'metadata', 'score']
+        return_fields = ['uuid','collection', 'text', 'metadata', 'score']
         
         if filters:
             for key, value in filters.items():
@@ -173,22 +211,28 @@ class RedisEngine(BaseEngine):
         
         # Return the top k results
 
-    def _serialize(self, documents) -> list[dict[str,str] | dict[str,dict[str,str]]]:
+    def _serialize(self, documents, include_score : bool = False) -> list[dict[str,str] | dict[str,dict[str,str]]]:
         """
         Serialize the redis output, merging the metadata
         
         """
         
         data: list[dict[str,str] | dict[str,dict[str,str]]] = []
-        
+
         for doc in documents:
             
-            data.append({
+            
+            data_dict = {
+                'uuid': doc['uuid'],
                 'collection': doc['collection'],
                 'text': doc['text'],
                 'metadata': {key: value for key, value in [item.split(':') for item in doc['metadata'].split(',')]} if doc['metadata'] else {},
-                'score': doc['score']
-            })
+            }
+            
+            if include_score:
+                data_dict['score'] = doc['score']
+                
+            data.append(data_dict)
             
             
         return data

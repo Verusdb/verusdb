@@ -9,7 +9,7 @@ settings = Settings(
     engine='polars',
     store='parquet',
     embeddings=OpenAIEmbeddingsEngine(
-        key=os.environ['OPENAI_API_KEY'],
+        api_key=os.environ['OPENAI_API_KEY'],
     )
 )
 
@@ -22,6 +22,7 @@ client.add(
     metadata=[{'source': 'input', 'pages': '3'}, {'source': 'input', 'pages': '5'}]
 )
 
-reponse  = client.search(text='what is my first document?')
+response  = client.search(text='what is my first document?')
 
+print(response)
 # [{'collection': 'MyCollection', 'text': 'This is my first document', 'metadata__source': 'input', 'metadata__pages': '3', 'cosine_similarity': 0.937450967393278}, {'collection': 'MyCollection', 'text': 'This is my second document', 'metadata__source': 'input', 'metadata__pages': '5', 'cosine_similarity': 0.8927016698439493}]

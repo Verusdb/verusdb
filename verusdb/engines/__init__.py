@@ -20,8 +20,4 @@ class BaseEngine(ABC):
     def search(self, collection, query, filters, num_results=10) -> list[dict[str, str]]:
         pass
 
-    @abstractmethod
-    def save(self, path) -> bool:
-        pass
-
     
