@@ -85,4 +85,4 @@ class TestVerusRedisClient(unittest.TestCase):
         self.assertEqual(temp[0]['collection'], 'test_search_with_text') # type: ignore
                 
         
-      
+       

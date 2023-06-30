@@ -66,3 +66,19 @@ class TestVerusPostgreSQLClient(unittest.TestCase):
         temp = self.client.search(embedding=embedding, collection='test')
         
         self.assertIsInstance(temp, list)
+
+
+    def test_search_with_text(self):
+        
+        self.client.add(
+            collection='test_search_with_text',
+            texts=['This is my first document', 'This is my second document'],
+        )
+        
+        temp = self.client.search(text='what is my first document?', collection='test_search_with_text')
+        
+        self.assertIsInstance(temp, list)
+        self.assertEqual(len(temp), 2) # type: ignore
+        self.assertEqual(temp[0]['collection'], 'test_search_with_text') # type: ignore
+                
+        

@@ -40,14 +40,30 @@ class PostgreSQLEngine(BaseEngine):
         )
         results = cursor.fetchone()
 
+        
         if results and not results[0]:
             cursor.execute(
                 f"CREATE TABLE {self.pg_table} (uuid varchar(250), collection text, text text, metadata JSON, embeddings vector({self.dimensions}));"
             )
             self.connection.commit()
             
+            
         cursor.close()
+    def search_text(self, text: str, collection: str | None = None,  filters: dict[str, str] | None = None, top_k: int = 10, return_object: bool | None = None):
+        """
+        Search the index for a text string
+        """
+        # calulate the embedding
+        if self.embeddings_engine is None:
+            raise ValueError('Embeddings Engine is not set')
+        
+        embedding : list[float] = self.embeddings_engine.encode(text)
 
+        #perform the search
+        results  = self.search(embedding, collection, filters, top_k)
+
+        # Return the top k results
+        return results
 
     def _serialize(self, documents):
         return super()._serialize(documents)
@@ -102,6 +118,21 @@ class PostgreSQLEngine(BaseEngine):
         return results
 
         
+    def search_text(self, text: str, collection: str | None = None,  filters: dict[str, str] | None = None, top_k: int = 10, return_object: bool | None = None):
+        """
+        Search the index for a text string
+        """
+        # calulate the embedding
+        if self.embeddings_engine is None:
+            raise ValueError('Embeddings Engine is not set')
+        
+        embedding : list[float] = self.embeddings_engine.encode(text)
+
+        #perform the search
+        results  = self.search(embedding, collection, filters, top_k)
+
+        # Return the top k results
+        return results
 
     def clear(self):
         cursor = self.connection.cursor()
