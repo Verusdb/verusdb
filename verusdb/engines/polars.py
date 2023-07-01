@@ -1,10 +1,10 @@
 from __future__ import annotations
+import os
 import numpy as np
 import polars as pl
 from verusdb.engines import BaseEngine
 from verusdb.settings import Settings
 from verusdb.utils import generate_uuid
-import os
 
 
 class PolarsEngine(BaseEngine):

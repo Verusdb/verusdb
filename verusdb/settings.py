@@ -1,7 +1,4 @@
 from __future__ import annotations
-import os
-import polars as pl
-from abc import ABC, abstractmethod
 from verusdb.embeddings import BaseEmbeddingsEngine
 
 class Settings:

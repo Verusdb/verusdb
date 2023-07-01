@@ -1,7 +1,5 @@
 from __future__ import annotations
 import psycopg2
-import polars as pl
-import numpy as np
 import json
 from psycopg2.extras import RealDictCursor
 from verusdb.engines import BaseEngine

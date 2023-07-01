@@ -1,7 +1,5 @@
 from __future__ import annotations
-import polars as pl
 from verusdb.settings import Settings
-import numpy as np
 from verusdb.engines.polars import PolarsEngine
 from verusdb.engines.redis import RedisEngine
 from verusdb.engines.postgresql import PostgreSQLEngine
